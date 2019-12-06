@@ -1,84 +1,59 @@
 local utils = require "utils"
-local game = require "game"
-ship = love.graphics.newImage("ship.png")--6x56--21x29
---ship = loadTransparent("ship.png", 163,73,164)
-shipIdle = love.graphics.newQuad(6,56,22,29, ship:getDimensions())
+local ship = require "ship"
 wid = love.graphics.getWidth()
 hei = love.graphics.getHeight()
-origX = 11
-posX = 150-origX
-posY = hei-29
 lr,lg,lb = 0,0,0
+lir = 0
 
 function love.load()
-	print("\ngame started")
-	utils.teste()
-	ship = loadTransparent("ship.png", 163,73,164)
-	atira = true
-	delaytiro = .1
-	tempoatipo = delaytiro
-	tiros = {}
-	imgtiro = love.graphics.newQuad(114,48,6,6, ship:getDimensions())
-
-end
-function makeTransparent(x, y, r, g, b, a)
-   if r == lr and g == lg and b == lb then
-     a = 0
-   end
-   return r,g,b,a
-end
-function loadTransparent(imagePath, transR, transG, transB)
-	imageData = love.image.newImageData( imagePath )
-	lr,lg,lb = imageData:getPixel(0,0)
-	imageData:mapPixel(makeTransparent)
-	--function mapFunction(x, y, r, g, b, a)
---	-	if r == transR and g == transG and b == transB then a = 0 end-
---		return r,g,b,a
---	end
-	--imageData:mapPixel( mapFunction )
-	return love.graphics.newImage( imageData )
+	ship = ship.novo ()
+	
+	
 end
 function love.resize(w, h)
 end
 
 function love.draw()
-    love.graphics.draw(ship, shipIdle,posX,posY)
-	for i, tiro in ipairs(tiros) do
-		love.graphics.draw(ship, tiro.img,tiro.x+origX-3,tiro.y)
+	xa = 0
+	lir = 1
+	if dir == -1 then
+    	xa = 32
+    	lir = -1
+	end
+	love.graphics.draw(ship.pref, ship.frame,ship.posX+xa,ship.posY,0, lir, 1)
+	love.graphics.setColor(128,19,54)
+	love.graphics.rectangle("fill", ship.posX, ship.posY + ship.width + 20,32,10)
+
+	for i, tiro in pairs(ship.tiros) do
+		love.graphics.draw(ship.pref, tiro.img, tiro.x + ship.origX, tiro.y)
 	end
 end
 
 function love.update(dt)
-    if posX > 0 then
+	canMove = false
+    if ship.posX > 0 then
         if love.keyboard.isDown("left") or love.keyboard.isDown("a") then
-            posX = posX-100*dt        
+            dir = -1  
+            canMove = true  
         end
     end
-    if posX < wid - 2*origX then
-        if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
-            posX = posX+100*dt        
+    if ship.posX < wid - ship.width then
+        if love.keyboard.isDown("right") or love.keyboard.isDown("d") then  
+            dir = 1
+            canMove = true
         end
     end
-    if love.keyboard.isDown("space") and atira then
-		novotiro = {x = posX, y = posY, img = imgtiro}
-		table.insert(tiros, novotiro)
-		atira = false
-		tempoatipo = delaytiro
+    if love.keyboard.isDown("right") ==false  and love.keyboard.isDown("d") ==false  and love.keyboard.isDown("left")==false  and love.keyboard.isDown("a")==false then
+    	dir = 0
+    end
+    ship.move(dir, dt, canMove)
+    if love.keyboard.isDown("space") and ship.atira then
+		novotiro = {x = ship.posX, y = ship.posY, img = ship.imgtiro}
+		table.insert(ship.tiros, novotiro)
+		ship.atira = false
+		ship.tempoatipo = ship.delaytiro
 	end
-	atirar(dt)
-end
-function atirar(dt)
-	tempoatipo = tempoatipo - 1*dt
-	if tempoatipo < 0 then
-		atira = true
-	end
-	
-	for i, tiro in ipairs(tiros) do
-		tiro.y = tiro.y - (500*dt)
-		if tiro.y < 0 then
-			table.remove(tiros, i)
-		end
-	end
+	ship.atirar(dt)
 end
 function love.keypressed(key, scancode, isrepeat)
 	if (key == "escape") then
