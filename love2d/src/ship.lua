@@ -6,6 +6,7 @@ function ship.novo ()
 	wid = love.graphics.getWidth()
 	hei = love.graphics.getHeight()
 	local _ship = {}
+	_ship.mhp = 10.0
 	_ship.hp = 10.0
 	_ship.frameMax = 10
 	_ship.frameCount = 0
@@ -21,7 +22,7 @@ function ship.novo ()
 	_ship.frame = _ship.img
 	_ship.speed = 200
 	_ship.atira = true
-	_ship.delaytiro = .1
+	_ship.delaytiro = 0.1
 	_ship.tempoatipo = _ship.delaytiro
 	_ship.dir = 0
 	_ship.tiros = {}
